@@ -6,7 +6,10 @@ import { PantryPanel } from "../features/pantry";
 import { KitchenPanel } from "../features/kitchen";
 import { ServicePanel } from "../features/service";
 import { LedgerPanel, ResultOverlay, totals } from "../features/ledger";
+import { QueuePanel } from "../features/queue";
+import { useShortcuts } from "../features/queue/ui/useShortcuts";
 const { game, toggle, restart } = useSession();
+useShortcuts(game, (c) => dispatch(game, c), toggle);
 </script>
 <template>
   <div class="app-shell">
@@ -80,6 +83,7 @@ const { game, toggle, restart } = useSession();
         </div>
       </div>
       <OrdersPanel :game="game" @command="(c) => dispatch(game, c)" />
+      <QueuePanel :game="game" @command="(c) => dispatch(game, c)" />
       <div class="workspace">
         <PantryPanel
           :game="game"

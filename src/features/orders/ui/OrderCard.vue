@@ -2,8 +2,13 @@
 import type { Order, Game } from "../../../shared/types";
 import { recipes } from "../../../shared/catalog";
 import { patience } from "../lib/patience";
+import { heldBy } from "../../queue/lib/locks";
 defineProps<{ order: Order; game: Game }>();
-defineEmits<{ accept: [id: number]; select: [id: number] }>();
+defineEmits<{
+  accept: [id: number];
+  select: [id: number];
+  reserve: [id: number];
+}>();
 </script>
 <template>
   <article
@@ -34,6 +39,18 @@ defineEmits<{ accept: [id: number]; select: [id: number] }>();
       接单</button
     ><button v-else class="soft" @click="$emit('select', order.id)">
       {{ game.selectedOrder === order.id ? "已选为上菜目标" : "选择上菜目标" }}
+    </button>
+    <button
+      v-if="order.status === 'waiting'"
+      class="tiny soft reserve-btn"
+      :disabled="heldBy(game, { kind: 'order', orderId: order.id }) != null"
+      @click="$emit('reserve', order.id)"
+    >
+      {{
+        heldBy(game, { kind: "order", orderId: order.id }) != null
+          ? "已被预约锁定"
+          : "🕘 预约接单（可锁定）"
+      }}
     </button>
   </article>
 </template>

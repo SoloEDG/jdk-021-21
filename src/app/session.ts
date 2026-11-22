@@ -2,6 +2,7 @@ import { reactive, onUnmounted } from "vue";
 import { createGame } from "../shared/initial";
 import { expire, arrive } from "../features/orders";
 import { closeShift, saveBest, readBest } from "../features/ledger";
+import { pump } from "../features/queue";
 export function useSession() {
   const game = reactive(createGame(readBest()));
   let last = performance.now(),
@@ -20,6 +21,8 @@ export function useSession() {
       );
       expire(game);
       if (Math.round(game.time * 10) % 180 === 0) arrive(game);
+      // 每个时间片推进队列：暂停时本循环不运行，烹饪不会被推进
+      pump(game);
       if (game.time >= game.duration) {
         closeShift(game);
         saveBest(game);
@@ -34,7 +37,7 @@ export function useSession() {
     game.running = !game.running;
     game.notice = game.running
       ? "营业中，客人已经入座。"
-      : "已暂停，所有厨房计时冻结。";
+      : "已暂停，所有厨房计时冻结；仍可编辑操作队列。";
   }
   function restart() {
     Object.assign(game, createGame(game.best));

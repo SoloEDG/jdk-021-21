@@ -1,11 +1,14 @@
 import type { Game } from "../../../shared/types";
 import { totals } from "../lib/totals";
+import { cancelAllForClose } from "../../queue";
 export function closeShift(g: Game) {
   g.running = false;
   g.ended = true;
   g.portions = [];
   g.dishes = [];
   g.stoves.forEach((s) => (s.portion = null));
+  // 打烊：未完成的预约全部取消并释放锁，已执行记录保留在队列中
+  cancelAllForClose(g);
   g.best = Math.max(g.best, totals(g).net);
   g.notice = "午市结束，辛苦了，主厨！";
 }

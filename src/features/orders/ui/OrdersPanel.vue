@@ -1,9 +1,23 @@
 <script setup lang="ts">
-import type { Game, Command } from "../../../shared/types";
+import type { Game, Command, QueueDraft } from "../../../shared/types";
 import { activeOrders } from "../lib/patience";
 import OrderCard from "./OrderCard.vue";
 defineProps<{ game: Game }>();
-defineEmits<{ command: [cmd: Command] }>();
+const emit = defineEmits<{ command: [cmd: Command] }>();
+
+function reserveAccept(id: number) {
+  const draft: QueueDraft = {
+    action: "accept",
+    recipe: null,
+    stoveId: null,
+    portionId: null,
+    dishId: null,
+    orderId: id,
+    bindMode: "specific",
+    lock: true,
+  };
+  emit("command", { type: "q-add", draft });
+}
 </script>
 <template>
   <section class="orders-section">
@@ -22,8 +36,9 @@ defineEmits<{ command: [cmd: Command] }>();
         :key="o.id"
         :order="o"
         :game="game"
-        @accept="(id) => $emit('command', { type: 'accept', id })"
-        @select="(id) => $emit('command', { type: 'select-order', id })"
+        @accept="(id) => emit('command', { type: 'accept', id })"
+        @select="(id) => emit('command', { type: 'select-order', id })"
+        @reserve="reserveAccept"
       />
       <div v-if="!activeOrders(game).length" class="empty">
         餐厅暂时安静，整理一下厨房吧。

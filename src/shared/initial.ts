@@ -43,6 +43,8 @@ export function createGame(best = 0): Game {
     ],
     dishes: [],
     entries: [],
+    queue: [],
+    locks: [],
     combo: 0,
     served: 0,
     missed: 0,
